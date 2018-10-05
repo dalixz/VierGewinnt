@@ -27,7 +27,9 @@
     <Folder Include="Konzeption\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Konzeption\Klassendiagramm_v1.png" />
     <Content Include="Konzeption\SkizzeAufbau.pdf" />
+    <Content Include="Konzeption\WebSequenceDiagrammOK.PNG" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
