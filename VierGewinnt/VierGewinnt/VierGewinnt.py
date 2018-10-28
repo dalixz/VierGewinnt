@@ -1,6 +1,6 @@
-import pgzero
-import uuid
+import pgzrun
 
-print(uuid.uuid4())
+WIDTH = 300
+HEIGHT = 300
 
-print("Hallo Welt")
+pgzrun.go()
