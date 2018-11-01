@@ -1,6 +1,13 @@
-import pgzrun
+import VierGewinntUI
+import VierGewinntLogic
+import _thread
+import time
 
-WIDTH = 300
-HEIGHT = 300
+__author__ = "Oliver Kümmerle & David Lingmann"
+__version__ = "0.8.1"
 
-pgzrun.go()
+if __name__ == "__main__":
+    logic = VierGewinntLogic.MainLogic()
+
+    ui = VierGewinntUI.VierGewinntWindow(logic)
+    ui.generate_mainloop()
