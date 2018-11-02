@@ -7,16 +7,17 @@ class VierGewinntWindow:
         self.logic = VierGewinntLogic
         self.window = None
         self.current_screen_name = None
-        #self.default_background_color = "#303030"
+        self.default_background_color = "#3f89ff"
         self.yellow = "#faff00"
-        self.blue = "#19baff"
-        self.holes = []
+        self.red = "#ff4f4f"
+        self.holes = [None] * 7 # 7 horizontal - leeres array initailisieren
+
 
     def generate_mainloop(self):
         self.window = Tk()
         self.window.title("Vier Gewinnt")
-        self.window.geometry("500x300")
-        #self.window.tk_setPalette(self.default_background_color)
+        self.window.geometry("330x330")
+        self.window.tk_setPalette(self.default_background_color)
         self.window.after(10, self.update_screen)
         self.window.mainloop()
 
@@ -31,6 +32,9 @@ class VierGewinntWindow:
         if self.logic.get_started() and self.current_screen_name != "gamefield":
             self.current_screen_name = "gamefield"
             self.draw_gamefield()
+
+        if self.logic.get_started():
+            self.set_current_play_name()
 
     def draw_startscreen(self):
         print("drawing startscreen")
@@ -60,7 +64,7 @@ class VierGewinntWindow:
         self.window.after(200, self.blink_headline, label)
 
         if label.cget("fg") == self.yellow:
-            label.config(fg=self.blue)
+            label.config(fg=self.red)
         else:
             label.config(fg=self.yellow)
 
@@ -72,10 +76,34 @@ class VierGewinntWindow:
         #Fenster leeren
         self.clear_widgets()
 
-        canvas = Canvas(self.window, width=400, height=400)
-        canvas.pack()
-        canvas.create_oval(10, 10, 30, 30)
+        #Überschrift mit Spieler welcher derzeit dran ist
+        self.player_headline = Label(self.window, text="Hallo asfgkjsher", font=(None, 16), pady=5)
+        self.player_headline.pack()
+
+        #Einzelne Holes in ein neues Frame packen (pack() und grid() verträgt sich nicht)
+        self.game_field_frame = Frame(self.window)
+        self.game_field_frame.pack()
+
+        #Hole Array initailisieren
+        row_offset = 0
+        column_offset = 0
+
+        for h in self.holes:
+            h = [None] * 6 # vertical
+
+            for v in h:
+                print("create canvas")
+                v = Canvas(self.game_field_frame, width=40, height=40)
+                v.grid(row=row_offset, column=column_offset)
+                v.create_oval(10, 10, 42, 42)
+                row_offset += 1
+
+            row_offset = 0
+            column_offset += 1
 
     def clear_widgets(self):
         for widget in self.window.winfo_children():
             widget.destroy()
+
+    def set_current_play_name(self):
+        print("")
