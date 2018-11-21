@@ -5,6 +5,7 @@ class MainLogic:
         self.playername1 = None
         self.playername2 = None
         self.current_player_id = 1
+        self.holes = []
 
     def get_started(self):
         return self.started
@@ -23,3 +24,16 @@ class MainLogic:
             return self.playername1
         if self.current_player_id == 2:
             return self.playername2
+
+
+class Hole:
+    def __init__(self):
+        self.used_by = 0
+        self.probe = False
+
+    def set_used(by):
+        self.used_by = by
+        self.probe = False
+
+    def set_probe(by):
+        self.used_by = by
