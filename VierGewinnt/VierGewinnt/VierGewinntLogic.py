@@ -5,7 +5,7 @@ class MainLogic:
         self.playername1 = None
         self.playername2 = None
         self.current_player_id = 1
-        self.holes = []
+        self.holes = [[Hole()] * 6] * 7      
 
     def get_started(self):
         return self.started
@@ -31,9 +31,14 @@ class Hole:
         self.used_by = 0
         self.probe = False
 
-    def set_used(by):
+    def set_used(self, by):
         self.used_by = by
         self.probe = False
 
-    def set_probe(by):
+    def set_probe(self, by):
         self.used_by = by
+
+    def clear_use(self):
+        self.used_by = 0
+        self.probe = False
+        

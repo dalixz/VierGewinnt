@@ -124,12 +124,17 @@ class VierGewinntWindow:
 
             for v in h:
                 v = Canvas(self.game_field_frame, width=40, height=40)
+                v.bind("<Button-1>", self.on_hole_click)
                 v.grid(row=row_offset, column=column_offset)
                 v.create_oval(10, 10, 42, 42)
                 row_offset += 1
 
             row_offset = 0
             column_offset += 1
+
+    def on_hole_click(self, event):
+        grid_info = event.widget.grid_info()
+        column = grid_info["column"]
 
     def clear_widgets(self):
         for widget in self.window.winfo_children():
