@@ -10,7 +10,7 @@ class VierGewinntWindow:
         self.default_background_color = "#bcd6ff"
         self.yellow = "#faff00"
         self.red = "#ff4f4f"
-        self.holes = [None] * 7 # 7 horizontal - leeres array initailisieren
+        self.holes = [[Canvas] * 6] * 7 # leeres 6x7 matrix initailisieren
         self.playername2_backup = None
 
 
@@ -120,8 +120,6 @@ class VierGewinntWindow:
         column_offset = 0
 
         for h in self.holes:
-            h = [None] * 6 # vertical
-
             for v in h:
                 v = Canvas(self.game_field_frame, width=40, height=40)
                 v.bind("<Button-1>", self.on_hole_click)
@@ -134,7 +132,11 @@ class VierGewinntWindow:
 
     def on_hole_click(self, event):
         grid_info = event.widget.grid_info()
-        column = grid_info["column"]
+        column_index = grid_info["column"]
+        success = self.logic.set_by_column(column_index)
+        if success:
+            self.refresh_holes()
+
 
     def clear_widgets(self):
         for widget in self.window.winfo_children():
@@ -154,4 +156,24 @@ class VierGewinntWindow:
             self.textbox_playername2.delete('1.0', END)
             self.textbox_playername2.insert(END, "Computer")
             self.textbox_playername2.config(state="disabled")
+
+    def refresh_holes(self):
+        column_offset = 0
+        vertical_offset = 0
+
+        for columns in self.holes:
+            vertical_offset = 0
+            for hole in columns:
+
+                used_by = self.logic.get_hole_is_used_by(column_offset, vertical_offset)
+                if used_by > 0:
+                    self.set_hole_color(hole, "red")
+                    print("used")
+
+                vertical_offset += 1
+            column_offset += 1
+
+    def set_hole_color(self, hole, color):
+        hole.create_rectangle(50, 25, 150, 75, fill="blue")
+
 
