@@ -6,6 +6,7 @@ class MainLogic:
         self.playername2 = None
         self.current_player_id = 1
         self.holes = [[Hole() for _ in range(6)] for _ in range(7)]  
+        self.winner_player_id = 0
 
     def get_started(self):
         return self.started
@@ -29,17 +30,36 @@ class MainLogic:
         if columm_index > (len(self.holes) - 1):
             raise ValueError("invalid column index")
 
+        #Prüfen, ob schon jemand gewonnen hat
+        if self.winner_player_id > 0:
+            raise Exception("Spiel ist bereits beendet")
+
         #iteration der vertikalen holes. unterstes hole herausfinden
         destination_hole = None
+        destination_vertical_index = 0
         for hole in self.holes[columm_index]:
             if not hole.get_is_used():
                 destination_hole = hole
+                destination_vertical_index += 1
+
+        destination_vertical_index -= 1
 
         #False zurückgeben wenn column schon voll ist
         if destination_hole == None:
             return False
 
         destination_hole.set_used(self.current_player_id)
+
+        #prüfen ob jemand gewonnen hat
+        if self.check_win_by(self.current_player_id, columm_index, destination_vertical_index):
+            self.winner_player_id = self.current_player_id
+
+        #spieler wechseln
+        if self.current_player_id == 1:
+            self.current_player_id = 2
+        else:
+            self.current_player_id = 1
+
         return True   
 
     def get_hole_is_used(self, column_index, vertical_index):
@@ -64,6 +84,45 @@ class MainLogic:
             raise ValueError("invalid vertical index")
 
         return column[vertical_index]
+
+    def check_win_by(self, player_id, horizontal_index, vertical_index):
+        matches = 0
+
+        vertical_matches = 0
+        horizontal_matches = 0
+
+        #horizintal
+        for h in range (0, 7):
+            if self.holes[h][vertical_index].get_is_used_by() == player_id or ((len(self.holes[h]) - 1 >= (vertical_index - h)) and self.holes[h][vertical_index - h].get_is_used_by() == player_id) or ((len(self.holes[h]) + 1 >= (vertical_index + h)) and self.holes[h][vertical_index + h].get_is_used_by() == player_id):
+                horizontal_matches += 1
+                if horizontal_matches >= 4:
+                    matches += 1
+            else:
+                horizontal_matches = 0
+                if horizontal_matches >= 4:
+                    matches += 1
+
+        #vertical
+        for v in range (0, 6):
+            if self.holes[horizontal_index][v].get_is_used_by() == player_id:
+                vertical_matches += 1
+                if vertical_matches >= 4:
+                    matches += 1
+            else:
+                vertical_matches = 0
+                if vertical_matches >= 4:
+                    matches += 1
+
+        #quer durchn garten
+        print(str(matches))
+
+        if matches >= 1:
+            return True
+
+        return False
+        
+
+
 
 
 class Hole:

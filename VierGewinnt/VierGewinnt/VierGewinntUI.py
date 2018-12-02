@@ -124,7 +124,13 @@ class VierGewinntWindow:
                 v = Canvas(self.game_field_frame, width=40, height=40)
                 v.bind("<Button-1>", self.on_hole_click)
                 v.grid(row=row_offset, column=column_offset)
-                v.create_oval(10, 10, 42, 42)
+                hole_color='white'
+                used_by = self.logic.get_hole_is_used_by(column_offset, row_offset)
+                if used_by == 1:
+                    hole_color = self.red
+                if used_by == 2:
+                    hole_color = self.yellow
+                v.create_oval(10, 10, 42, 42, fill=hole_color)
                 row_offset += 1
 
             row_offset = 0
@@ -135,7 +141,11 @@ class VierGewinntWindow:
         column_index = grid_info["column"]
         success = self.logic.set_by_column(column_index)
         if success:
-            self.refresh_holes()
+            #Workaround:
+            #Zugriff auf das Canvas und Konfiguration war nicht direkt möglich
+            #Daher komplettes Gamefield neu erstellen
+            self.clear_widgets()
+            self.draw_gamefield()
 
 
     def clear_widgets(self):
@@ -156,24 +166,5 @@ class VierGewinntWindow:
             self.textbox_playername2.delete('1.0', END)
             self.textbox_playername2.insert(END, "Computer")
             self.textbox_playername2.config(state="disabled")
-
-    def refresh_holes(self):
-        column_offset = 0
-        vertical_offset = 0
-
-        for columns in self.holes:
-            vertical_offset = 0
-            for hole in columns:
-
-                used_by = self.logic.get_hole_is_used_by(column_offset, vertical_offset)
-                if used_by > 0:
-                    self.set_hole_color(hole, "red")
-                    print("used")
-
-                vertical_offset += 1
-            column_offset += 1
-
-    def set_hole_color(self, hole, color):
-        hole.create_rectangle(50, 25, 150, 75, fill="blue")
 
 
