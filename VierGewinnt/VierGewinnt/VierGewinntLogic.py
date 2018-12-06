@@ -1,3 +1,5 @@
+import random
+
 class MainLogic:
     def __init__(self):
         self.started = False
@@ -53,6 +55,7 @@ class MainLogic:
         #prüfen ob jemand gewonnen hat
         if self.check_win_by(self.current_player_id, columm_index, destination_vertical_index):
             self.winner_player_id = self.current_player_id
+            return True
 
         #spieler wechseln
         if self.current_player_id == 1:
@@ -60,7 +63,89 @@ class MainLogic:
         else:
             self.current_player_id = 1
 
-        return True   
+        if self.use_ki and self.current_player_id == 2:
+            self.compute_ki(columm_index)
+            self.reset_all_probes()
+            if self.winner_player_id == 0:
+                self.current_player_id = 1
+
+        return True 
+
+    def compute_ki(self, last_column_index):
+        #prüfen ob ein gewinn durch einen einwurf möglich ist
+        for i in range(0, 6):
+            destination_hole = None
+            destination_vertical_index = -1
+
+            for hole in self.holes[i]:
+                if not hole.get_is_used():
+                    destination_hole = hole
+                    destination_vertical_index += 1
+
+            if destination_hole != None:
+                destination_hole.set_probe(2)
+
+                if self.check_win_by(2, i, destination_vertical_index):
+                    destination_hole.set_used(2)
+                    self.winner_player_id = self.current_player_id
+                    return
+
+            self.reset_all_probes()
+
+        #prüfen ob gegner durch den nächsten einwurf gewinnen kann und ggf. diese möglichkeit entfernen
+        for i in range(0, 6):
+            destination_hole = None
+            destination_vertical_index = -1
+
+            for hole in self.holes[i]:
+                if not hole.get_is_used():
+                    destination_hole = hole
+                    destination_vertical_index += 1
+
+            if destination_hole != None:
+                destination_hole.set_probe(1)
+
+                if self.check_win_by(1, i, destination_vertical_index):
+                    destination_hole.set_used(2)
+                    return
+
+            self.reset_all_probes()
+
+        #dort einwerfen wo zuletzt der user eingeworfenhat
+        destination_hole = None
+        destination_vertical_index = -1
+
+        for hole in self.holes[last_column_index]:
+            if not hole.get_is_used():
+                destination_hole = hole
+                destination_vertical_index += 1
+
+        if destination_hole != None:
+            destination_hole.set_used(2)
+            return
+
+        #ansonsten random setzen
+        for i in range(0, 200):
+            x = random.randint(0, 6)
+            destination_hole = None
+            destination_vertical_index = -1
+            for hole in self.holes[x]:
+                if not hole.get_is_used():
+                    destination_hole = hole
+                    destination_vertical_index += 1
+
+            if destination_hole != None:
+                destination_hole.set_used(2)
+                return
+        
+        return
+
+
+    def reset_all_probes(self):
+        for column in self.holes:
+            for hole in column:
+                if hole.get_is_probe():
+                    hole.clear_use()
 
     def get_hole_is_used(self, column_index, vertical_index):
         return self.get_hole(column_index, vertical_index).get_is_used()
@@ -86,43 +171,67 @@ class MainLogic:
         return column[vertical_index]
 
     def check_win_by(self, player_id, horizontal_index, vertical_index):
-        matches = 0
-
-        vertical_matches = 0
-        horizontal_matches = 0
+        matches_vertical = 0
+        matches_horizontal = 0
+        matches_q1 = 0
+        matches_q2 = 0
 
         #horizintal
         for h in range (0, 7):
-            if self.holes[h][vertical_index].get_is_used_by() == player_id or ((len(self.holes[h]) - 1 >= (vertical_index - h)) and self.holes[h][vertical_index - h].get_is_used_by() == player_id) or ((len(self.holes[h]) + 1 >= (vertical_index + h)) and self.holes[h][vertical_index + h].get_is_used_by() == player_id):
-                horizontal_matches += 1
-                if horizontal_matches >= 4:
-                    matches += 1
+            if self.holes[h][vertical_index].get_is_used_by() == player_id:
+                matches_horizontal += 1
             else:
-                horizontal_matches = 0
-                if horizontal_matches >= 4:
-                    matches += 1
+                matches_horizontal = 0
+
+            if matches_horizontal >= 4:
+                return True
 
         #vertical
         for v in range (0, 6):
             if self.holes[horizontal_index][v].get_is_used_by() == player_id:
-                vertical_matches += 1
-                if vertical_matches >= 4:
-                    matches += 1
+                matches_vertical += 1
             else:
-                vertical_matches = 0
-                if vertical_matches >= 4:
-                    matches += 1
+                matches_vertical = 0
 
-        #quer durchn garten
-        print(str(matches))
+            if matches_vertical >= 4:
+                return True
 
-        if matches >= 1:
-            return True
+        #quer
+        q1_start_offset = 0
+        q1_end_offset = 0
+        q2_start_offset = 0
+        q2_end_offset = 0
+        for i in range(1, 6):
+            #links oben -> rechts unten
+            if vertical_index - i >= 0 and horizontal_index - i >= 0:
+                q1_start_offset = i
+            if vertical_index + i <= 6 and horizontal_index + i <= 7:
+                q1_end_offset = i
+            #links unten -> rechts oben
+            if vertical_index + i <= 5 and horizontal_index - i >= 0:
+                q2_start_offset = i
+            if vertical_index - i >= 0 and horizontal_index + i <= 7:
+                q2_end_offset = i
+
+        for i in range(q1_start_offset * -1, q1_end_offset):
+            if self.holes[horizontal_index + i][vertical_index + i].get_is_used_by() == player_id:
+                matches_q1 += 1
+            else:
+                matches_q1 = 0
+
+            if matches_q1 >= 4:
+                return True
+
+        for i in range(q2_start_offset * -1, q2_end_offset):
+            if self.holes[horizontal_index + i][vertical_index - i].get_is_used_by() == player_id:
+                matches_q2 += 1
+            else:
+                matches_q2 = 0
+
+            if matches_q2 >= 4:
+                return True
 
         return False
-        
-
-
 
 
 class Hole:
@@ -136,6 +245,7 @@ class Hole:
 
     def set_probe(self, by):
         self.used_by = by
+        self.probe = True
 
     def clear_use(self):
         self.used_by = 0

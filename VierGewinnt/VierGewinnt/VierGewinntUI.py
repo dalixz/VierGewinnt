@@ -101,7 +101,7 @@ class VierGewinntWindow:
         player2_name = self.textbox_playername2.get("1.0", END).replace("\n", "")
 
         #Logik starten - use_ki = self.play_mode == 2
-        self.logic.start_game(self.play_mode == 2, player1_name, player2_name)
+        self.logic.start_game(self.play_mode.get() == 2, player1_name, player2_name)
 
     def draw_gamefield(self):
         #Fenster leeren
